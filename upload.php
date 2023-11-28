@@ -11,6 +11,20 @@ $database = new Database($ini['MYSQL']);
 
 $options = getopt('', ['force::']);
 
+if (isset($ini['NEEDED']['TABLES'])) {
+    $database->setNeededTables($ini['NEEDED']['TABLES']);
+
+} else {
+    $database->setNeededTables("");
+}
+
+if (isset($ini['EXCEPTION']['TABLES'])) {
+    $database->setExceptionTables($ini['EXCEPTION']['TABLES']);
+
+} else {
+    $database->setExceptionTables("");
+}
+
 if (isset($ini['UPDATE_ORDER'])) {
     $database->setUpdateOrder($ini['UPDATE_ORDER']);
 }
@@ -34,6 +48,7 @@ foreach ($tables as $table) {
         $object = unserialize($objectSerialized);
 
         $productionObject = $database->getTableObject($table, $object);
+
 
         if ($productionObject) {
             $database->updateObject($table, $object);

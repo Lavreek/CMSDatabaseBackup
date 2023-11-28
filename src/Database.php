@@ -136,8 +136,6 @@ class Database
             $columns = $this->updateOrders;
         }
 
-        var_dump($columns[$table], $this->updateOrders);
-
         $columnsQuery = implode('`, `', $columns[$table]);
 
         $whereColumns = [];
@@ -169,7 +167,7 @@ class Database
         $this->mysqli->query($query);
     }
 
-    public function updateObject(string $table, array $object)
+    public function updateObject(string $table, array $object) : void
     {
         if (count($this->neededTables) > 0 and empty($this->exceptionTables)) {
             if (in_array($table, $this->neededTables)) {
