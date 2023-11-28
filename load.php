@@ -27,11 +27,11 @@ if (isset($ini['EXCEPTION']['TABLES'])) {
     $database->setExceptionTables("");
 }
 
-if (isset($ini['USE_COLUMN'])) {
-    $database->setUsingColumns($ini['USE_COLUMN']);
+if (isset($ini['ORDER_BY'])) {
+    $database->setOrderBy($ini['ORDER_BY']);
 
 } else {
-    $database->setUsingColumns([]);
+    $database->setOrderBy([]);
 }
 
 $tables = $database->selectTablesName();
@@ -49,10 +49,13 @@ foreach ($tables as $table) {
         if (!is_null($objects)) {
             while ($object = mysqli_fetch_array($objects, MYSQLI_ASSOC)) {
                 if (!isset($object['id'])) {
-                    $object['id'] = md5(serialize($object));
+                    $filename = md5(serialize($object));
+
+                } else {
+                    $filename = $object['id'];
                 }
 
-                file_put_contents($tablePath . $object['id'] .".obj", serialize($object));
+                file_put_contents($tablePath . $filename .".obj", serialize($object));
             }
         }
 

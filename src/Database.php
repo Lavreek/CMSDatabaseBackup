@@ -15,6 +15,8 @@ class Database
 
     private array $updateOrders = [];
 
+    private array $orderBy = [];
+
     public function __construct(array $settings)
     {
         $this->mysqli = new mysqli($settings['HOST'], $settings['USER'], $settings['PASSWORD'], $settings['DATABASE']);
@@ -49,6 +51,11 @@ class Database
         foreach ($orders as $table => $columns) {
             $this->updateOrders += [$table => explode(",", $columns)];
         }
+    }
+
+    public function setOrderBy($orderBy) : void
+    {
+        $this->orderBy = $orderBy;
     }
 
     private function trimTablesString($tables) : array
@@ -89,31 +96,22 @@ class Database
         return [];
     }
 
-    public function selectTablePointer(
-        string $table, string|bool $orderColumn = 'id', $orderType = "ASC", int $offset = 0
-    ) : ?mysqli_result
+    public function selectTablePointer(string $table, string|bool $orderColumn = 'id', int $offset = 0) : ?mysqli_result
     {
-
         $mysqli = $this->mysqli;
 
-        if (!empty($this->usingColumns)) {
-            if (isset($this->usingColumns[$table])) {
-                $orderColumn = $this->usingColumns[$table];
+        if (!empty($this->orderBy)) {
+            if (isset($this->orderBy[$table])) {
+                $orderColumn = $this->orderBy[$table];
             }
+        } else {
+            $orderQuery = '`id` ASC';
         }
 
         $limit = 250;
         $offset = $limit * $offset;
 
-        $orderQuery = "";
-
-        if (is_bool($orderColumn)) {
-            if ($orderColumn) {
-                $orderQuery = $this->setOrder();
-            }
-        } elseif (is_string($orderColumn)) {
-            $orderQuery = $this->setOrder($orderColumn, $orderType);
-        }
+        $orderQuery = $this->setOrder($orderColumn);
 
         $query = "SELECT * FROM `$table` $orderQuery  LIMIT $limit OFFSET $offset ";
 
@@ -130,7 +128,7 @@ class Database
     {
         $mysqli = $this->mysqli;
 
-        $columns = ["id"];
+        $columns = [$table => ["id"]];
 
         if (!empty($this->updateOrders)) {
             $columns = $this->updateOrders;
@@ -157,12 +155,12 @@ class Database
         return null;
     }
 
-    private function setOrder(string $column = 'id', string $type = 'ASC')
+    private function setOrder(string $column = 'id') : string
     {
-        return " ORDER BY `$column` $type ";
+        return " ORDER BY $column";
     }
 
-    public function executeQuery(string $query)
+    public function executeQuery(string $query) : void
     {
         $this->mysqli->query($query);
     }
@@ -188,24 +186,30 @@ class Database
         $setColumns = [];
 
         foreach ($object as $column => $value) {
-            if (!in_array($column, $this->updateOrders[$table])) {
-                $value = mysqli_escape_string($mysqli, $value);
-                $setColumns[] = "`$column` = '$value'";
+            $value = mysqli_escape_string($mysqli, $value);
+            $setColumns[] = "`$column` = '$value'";
+        }
+
+        $whereQuery = "";
+        $whereColumns = [];
+
+        if (!empty($this->updateOrders)) {
+            if (isset($this->updateOrders[$table])) {
+                foreach ($this->updateOrders[$table] as $column) {
+                    $object[$column] = mysqli_escape_string($mysqli, $object[$column]);
+
+                    $whereColumns[] = "`$column` = '{$object[$column]}'";
+                }
             }
         }
 
-        $whereColumns = [];
+        $setQuery = implode(', ', $setColumns);
 
-        foreach ($this->updateOrders[$table] as $column) {
-            $object[$column] = mysqli_escape_string($mysqli, $object[$column]);
-
-            $whereColumns[] = "`$column` = '{$object[$column]}'";
+        if (!empty($whereColumns)) {
+            $whereQuery = " WHERE ". implode(' AND ', $whereColumns);
         }
 
-        $setQuery = implode(', ', $setColumns);
-        $whereQuery = implode(' AND ', $whereColumns);
-
-        $query = "UPDATE `$table` SET $setQuery WHERE $whereQuery";
+        $query = "UPDATE `$table` SET $setQuery $whereQuery";
 
         $this->executeQuery($query);
     }

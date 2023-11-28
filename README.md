@@ -14,16 +14,27 @@
 #### Использование разделов
 
 + [MYSQL]
-+ + HOST = "localhost"
-+ + USER = "root"
-+ + PASSWORD = "123123"
-+ + DATABASE = "TEST"
++ + HOST = "host"
++ + USER = "user"
++ + PASSWORD = "password"
++ + DATABASE = "database"
+######
 + [NEEDED]
 + + TABLES = ""
+######
 + [EXCEPTION]
 + + TABLES = ""
+######
 + [USE_COLUMN]
 + + TABLE1 = "id"
+######
++ [ORDER_BY]
++ + TABLE1 = "\`col1\` ASC"
++ + TABLE2 = "\`col2\` DESC, \`col1\` ASC"
+######
 + [CUSTOM_REQUESTS]
 + + TASK = "QUERY"
-    
+######
++ [UPDATE_ORDER]
++ + TABLE1 = "id"
++ + TABLE2 = "id,title"
