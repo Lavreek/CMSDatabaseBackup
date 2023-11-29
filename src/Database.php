@@ -163,6 +163,8 @@ class Database
     public function executeQuery(string $query) : void
     {
         $this->mysqli->query($query);
+
+        echo "Запрос выполнен.\n";
     }
 
     public function updateObject(string $table, array $object) : void
@@ -210,6 +212,30 @@ class Database
         }
 
         $query = "UPDATE `$table` SET $setQuery $whereQuery";
+
+        $this->executeQuery($query);
+    }
+
+    public function insertObject($table, $object) : void
+    {
+        $into = $values = array();
+
+        foreach ($object as $column => $value) {
+            $into[] = $column;
+            $values[] = $value;
+        }
+
+        echo "Часть запроса составлена\n";
+
+        $intoQuery = "(`". implode("`, `", $into) . "`)";
+
+        echo "\tВставляемые поля: $intoQuery\n";
+
+        $valuesQuery = "('". implode("', '", $values) . "')";
+
+        echo "\tВставляемые значения: $valuesQuery\n";
+
+        $query = "INSERT INTO `$table` $intoQuery VALUES $valuesQuery";
 
         $this->executeQuery($query);
     }
