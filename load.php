@@ -15,9 +15,6 @@ $tablesPath = $storagePath ."tables/";
 
 if (isset($ini['NEEDED']['TABLES'])) {
     $database->setNeededTables($ini['NEEDED']['TABLES']);
-
-} else {
-    $database->setNeededTables("");
 }
 
 if (isset($ini['EXCEPTION']['TABLES'])) {
