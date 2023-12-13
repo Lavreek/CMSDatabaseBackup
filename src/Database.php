@@ -162,7 +162,11 @@ class Database
 
     public function executeQuery(string $query) : void
     {
-        $this->mysqli->query($query);
+        try {
+            $this->mysqli->query($query);
+        } catch (mysqli_sql_exception $exception) {
+            file_put_contents(ROOT ."/error.log", $exception->getMessage()."\n", FILE_APPEND);
+        }
 
         echo "Запрос выполнен.\n";
     }
@@ -183,6 +187,8 @@ class Database
 
     private function updateObjectExecute($table, $object) : void
     {
+        echo "Обновление таблицы: $table\n";
+
         $mysqli = $this->mysqli;
 
         $setColumns = [];
@@ -213,6 +219,8 @@ class Database
 
         $query = "UPDATE `$table` SET $setQuery $whereQuery";
 
+        echo "Сгенерированный запрос:\n\t $query\n";
+
         $this->executeQuery($query);
     }
 
@@ -222,7 +230,7 @@ class Database
 
         foreach ($object as $column => $value) {
             $into[] = $column;
-            $values[] = $value;
+            $values[] = mysqli_escape_string($this->mysqli, $value);
         }
 
         echo "Часть запроса составлена\n";

@@ -5,7 +5,7 @@ define('ROOT', __DIR__ .'/');
 include ROOT ."verify.php";
 require_once ROOT ."src/Database.php";
 
-$ini = parse_ini_file(ROOT .".env", true);
+global $ini;
 
 $failedTablesPath = ROOT . "storage/failed/";
 $database = new Database($ini['MYSQL']);
