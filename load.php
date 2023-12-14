@@ -34,6 +34,8 @@ if (isset($ini['ORDER_BY'])) {
 $tables = $database->selectTablesName();
 
 foreach ($tables as $table) {
+    echo "Загрузка из таблицы: $table\n";
+
     if (!is_dir($tablesPath . $table)) {
         mkdir($tablesPath . $table, recursive: true);
     }
